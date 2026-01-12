@@ -1,0 +1,126 @@
+# ============================================================
+# RETAIL INSIGHTS ASSISTANT - BUSINESS RULES
+# ============================================================
+# This file controls business semantics, thresholds, and
+# interpretation logic. Agents must consult this for reasoning.
+# ============================================================
+
+
+# ----------------------------
+# 1. KPI DEFINITIONS
+# ----------------------------
+
+kpis:
+
+  total_revenue:
+    description: "Total sales revenue"
+    formula: "sum(revenue)"
+    source_table: "fact_sales"
+
+  total_units:
+    description: "Total units sold"
+    formula: "sum(units)"
+    source_table: "fact_sales"
+
+  total_orders:
+    description: "Total number of orders"
+    formula: "count(distinct order_id)"
+    source_table: "fact_sales"
+
+  cancellation_rate:
+    description: "Percentage of cancelled orders"
+    formula: "sum(is_cancelled) / count(order_id)"
+    source_table: "fact_sales"
+
+  international_revenue_share:
+    description: "Revenue contribution from international sales"
+    formula: "sum(revenue where is_international = true) / sum(revenue)"
+    source_table: "fact_sales"
+
+
+# ----------------------------
+# 2. THRESHOLDS & FLAGS
+# ----------------------------
+
+thresholds:
+
+  high_value_order: 5000
+  low_stock: 10
+
+  risk_levels:
+    revenue_drop:
+      warning: -0.05
+      critical: -0.15
+
+    cancellation_rate:
+      warning: 0.10
+      critical: 0.20
+
+    stock_imbalance_ratio:
+      warning: 3
+      critical: 6
+
+
+# ----------------------------
+# 3. EXECUTIVE SUMMARY RULES
+# ----------------------------
+
+executive_summary:
+
+  always_include:
+    - overall_revenue_trend
+    - top_category
+    - worst_category
+    - regional_performance
+    - cancellation_health
+
+  narrative_style:
+    tone: "business"
+    verbosity: "concise"
+    include_numbers: true
+    include_percentages: true
+
+  auto_insights:
+    - "highlight categories contributing >30% revenue"
+    - "flag regions with declining growth"
+    - "flag unusually high cancellation rate"
+    - "mention stock risks"
+
+
+# ----------------------------
+# 4. VALIDATION RULES
+# ----------------------------
+
+validation:
+
+  max_rows_returned: 1000
+  max_groupby_dimensions: 3
+  min_data_points_for_growth: 2
+
+  disallowed_patterns:
+    - "growth without time dimension"
+    - "ranking without metric"
+    - "yoy without year data"
+
+  sanity_limits:
+    revenue_growth_min: -0.90
+    revenue_growth_max: 10.0
+    cancellation_rate_max: 1.0
+
+
+# ----------------------------
+# 5. RESPONSE GOVERNANCE
+# ----------------------------
+
+response_policy:
+
+  require_source_table: true
+  prohibit_raw_sql_exposure: true
+  prohibit_row_level_dumping: true
+  allow_estimates_only_if_flagged: true
+
+  formatting:
+    default:
+      bullets: true
+      headline: true
+      max_sentences: 5

@@ -1,0 +1,31 @@
+# Data artifacts
+data/raw/
+data/staging/
+data/processed/
+data/profiles/
+
+data/raw/*.csv
+
+# Parquet / CSV
+*.parquet
+*.csv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environments
+.venv/
+.env
+env/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+
+# Local databases
+storage/*.duckdb

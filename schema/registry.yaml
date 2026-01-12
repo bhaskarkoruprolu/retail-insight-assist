@@ -1,0 +1,186 @@
+# ============================================================
+# RETAIL INSIGHTS ASSISTANT - SCHEMA REGISTRY
+# ============================================================
+# This file defines the semantic contract between data and agents.
+# Agents MUST only reason within what is defined here.
+# ============================================================
+
+
+# ----------------------------
+# 1. TABLE DEFINITIONS
+# ----------------------------
+
+tables:
+
+  fact_sales:
+    description: "Unified transactional sales fact table (domestic + international)"
+    storage: "data/processed/fact_sales_enriched.parquet"
+    grain: "one row per order line"
+    primary_key: ["order_id", "sku"]
+
+    time_column: "order_date"
+    partitions: ["year", "month", "region_clean"]
+
+    columns:
+      order_id: {type: string, role: identifier}
+      order_date: {type: date, role: time}
+      year: {type: integer, role: time}
+      month: {type: integer, role: time}
+      quarter: {type: string, role: time}
+
+      sku: {type: string, role: join_key}
+      style: {type: string, role: dimension}
+      category: {type: string, role: dimension}
+      category_clean: {type: string, role: dimension}
+
+      units: {type: integer, role: metric}
+      revenue: {type: float, role: metric}
+      currency: {type: string, role: attribute}
+
+      region: {type: string, role: dimension}
+      region_clean: {type: string, role: dimension}
+      country: {type: string, role: dimension}
+      state: {type: string, role: dimension}
+      city: {type: string, role: dimension}
+
+      sales_channel: {type: string, role: dimension}
+      fulfillment_type: {type: string, role: dimension}
+      order_status: {type: string, role: dimension}
+
+      is_b2b: {type: boolean, role: filter}
+      is_cancelled: {type: boolean, role: filter}
+      is_international: {type: boolean, role: filter}
+      is_high_value_order: {type: boolean, role: filter}
+
+      year_month: {type: string, role: time}
+      year_quarter: {type: string, role: time}
+
+
+  dim_product:
+    description: "Product master and inventory dimension table"
+    storage: "data/processed/dim_product_enriched.parquet"
+    grain: "one row per SKU"
+    primary_key: ["sku"]
+
+    columns:
+      sku: {type: string, role: join_key}
+      style: {type: string, role: dimension}
+      category: {type: string, role: dimension}
+      category_clean: {type: string, role: dimension}
+      size: {type: string, role: dimension}
+      color: {type: string, role: dimension}
+
+      current_stock: {type: integer, role: metric}
+      is_low_stock: {type: boolean, role: filter}
+
+      cost_price: {type: float, role: metric}
+      mrp: {type: float, role: metric}
+      amazon_price: {type: float, role: metric}
+      myntra_price: {type: float, role: metric}
+      snapdeal_price: {type: float, role: metric}
+
+
+  finance_summary:
+    description: "High-level finance snapshot table (non-transactional)"
+    storage: "data/processed/finance_summary.parquet"
+    grain: "finance snapshot"
+
+    columns:
+      snapshot_date: {type: date, role: time}
+      received_amount: {type: float, role: metric}
+      expense_amount: {type: float, role: metric}
+
+
+# ----------------------------
+# 2. JOIN RULES
+# ----------------------------
+
+joins:
+
+  - left: fact_sales
+    right: dim_product
+    on: ["sku"]
+    type: left
+    description: "Sales enriched with product and inventory attributes"
+
+
+# ----------------------------
+# 3. SUPPORTED METRICS
+# ----------------------------
+
+metrics:
+
+  revenue:
+    base_column: revenue
+    aggregations: [sum, avg, min, max]
+
+  units:
+    base_column: units
+    aggregations: [sum, avg]
+
+  orders:
+    base_column: order_id
+    aggregations: [count, distinct_count]
+
+  cancellation_rate:
+    logic: "sum(is_cancelled) / count(order_id)"
+    requires: ["is_cancelled", "order_id"]
+
+  yoy_growth:
+    logic: "(current_period - previous_period) / previous_period"
+    requires: ["year", "revenue"]
+
+  qoq_growth:
+    logic: "(current_period - previous_period) / previous_period"
+    requires: ["quarter", "revenue"]
+
+
+# ----------------------------
+# 4. TIME INTELLIGENCE
+# ----------------------------
+
+time_definitions:
+
+  primary_time_column: order_date
+
+  derived_fields:
+    - year
+    - month
+    - quarter
+    - year_month
+    - year_quarter
+
+  supported_comparisons:
+    - yoy
+    - qoq
+    - mom
+
+
+# ----------------------------
+# 5. ALLOWED QUESTION TYPES
+# ----------------------------
+
+question_types:
+
+  - aggregation
+  - comparison
+  - ranking
+  - trend
+  - distribution
+  - anomaly
+  - summary
+
+
+# ----------------------------
+# 6. BUSINESS RULES
+# ----------------------------
+
+business_rules:
+
+  revenue_currency: "INR"
+  high_value_order_threshold: 5000
+  low_stock_threshold: 10
+
+  safety_limits:
+    max_groupby_columns: 3
+    max_result_rows: 1000
