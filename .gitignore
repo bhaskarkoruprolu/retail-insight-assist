@@ -1,9 +1,30 @@
+<<<<<<< HEAD
+# Environments
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+
+# Data artifacts (keep raw CSVs if assignment allows)
+=======
 # Data artifacts
 data/raw/
+>>>>>>> cc50298b3c992b1d254c3e8e9f9ca0a062fb9bfb
 data/staging/
 data/processed/
 data/profiles/
 
+<<<<<<< HEAD
+# DuckDB temp files
+*.duckdb
+*.db
+=======
 data/raw/*.csv
 
 # Parquet / CSV
@@ -19,13 +40,17 @@ __pycache__/
 .env
 env/
 venv/
+>>>>>>> cc50298b3c992b1d254c3e8e9f9ca0a062fb9bfb
 
 # OS
 .DS_Store
 Thumbs.db
+<<<<<<< HEAD
+=======
 
 # IDE
 .vscode/
 
 # Local databases
 storage/*.duckdb
+>>>>>>> cc50298b3c992b1d254c3e8e9f9ca0a062fb9bfb

@@ -289,6 +289,24 @@ The UI will be available at:
 
 http://localhost:8501
 
+### 🔹 Docker Deployment
+
+1. **Build the Docker Image**
+
+```bash
+docker build -t retail-insights-assistant .
+```
+
+2. **Run the Docker Container**
+
+   Since the application requires an OpenAI API key, pass it as an environment variable (without quotes):
+
+```bash
+docker run -p 8501:8501 -e OPENAI_API_KEY=your-api-key-here retail-insights-assistant
+```
+
+   Access the application at `http://localhost:8501`.
+
 ###  🔹 Example Queries
 
 - Which category generated the highest revenue last quarter?
@@ -296,7 +314,3 @@ http://localhost:8501
 - How did total revenue change over the last 3 months?
 
 - Compare domestic and international revenue for the last quarter.
-
-### Key consideration 
-please add LLM calling key in llm_client
-also add api_key=OPENAI_API_KEY in code(line 10)
