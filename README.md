@@ -3,7 +3,7 @@
 
 A production-style, multi-agent GenAI system that translates natural-language business questions into validated analytical insights over structured retail data.
 
-Built as part of the **Blend360 GenAI Interview Assignment**.
+
 
 ---
 
