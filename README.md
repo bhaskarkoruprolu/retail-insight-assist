@@ -236,7 +236,7 @@ This project demonstrates:
 - Analytics-first architecture  
 - Production-grade thinking  
 
-It satisfies the functional, technical, and architectural requirements of the Blend360 GenAI assignment.
+It satisfies the functional, technical, and architectural requirements.
 
 
 ## ⚙️ Setup & Execution Guide
